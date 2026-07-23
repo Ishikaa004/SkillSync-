@@ -1,6 +1,7 @@
 from fastapi import APIRouter,UploadFile, File,HTTPException
 from services.upload_service import save_resume
 from services.parser_service import extract_resume_text
+from services.extractor_service import extract_resume_details
 
 router= APIRouter(
      prefix="/api/v1/upload",
@@ -29,9 +30,12 @@ async def upload_resume(file: UploadFile = File(...)):
 
     resume_text = extract_resume_text(file_path)
 
+    details = extract_resume_details(resume_text)
+
     return {
         "message": "Resume uploaded successfully.",
         "file_path": file_path,
-        "resume_text": resume_text
+        "resume_text": resume_text,
+        "details": details
     }
     
