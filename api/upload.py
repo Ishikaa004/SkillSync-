@@ -2,6 +2,10 @@ from fastapi import APIRouter,UploadFile, File,HTTPException
 from services.upload_service import save_resume
 from services.parser_service import extract_resume_text
 from services.extractor_service import extract_resume_details
+from services.ats_service import analyze_resume
+from services.llm_service import get_ai_feedback
+from services.llm_service import get_ai_feedback
+from services.ats_service import read_job_description
 
 router= APIRouter(
      prefix="/api/v1/upload",
@@ -32,10 +36,25 @@ async def upload_resume(file: UploadFile = File(...)):
 
     details = extract_resume_details(resume_text)
 
+    ats_analysis = analyze_resume(details["skills"])
+
+    job_description = read_job_description()
+
+    ai_feedback = get_ai_feedback(
+    resume_text,
+    ats_analysis["ats_score"],
+    ats_analysis["matched_skills"],
+    ats_analysis["missing_skills"],
+    job_description
+     )
+
+
     return {
         "message": "Resume uploaded successfully.",
         "file_path": file_path,
         "resume_text": resume_text,
-        "details": details
+        "details": details,
+        "ats_analysis": ats_analysis,
+        "ai_feedback": ai_feedback
     }
     
