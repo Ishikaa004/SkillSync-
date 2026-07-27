@@ -1,6 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -10,9 +11,9 @@ llm = ChatGroq(
 )
 
 prompt = ChatPromptTemplate.from_template("""
-You are an expert ATS Resume Reviewer and Career Coach.
+You are an expert ATS Resume Reviewer.
 
-Below is the candidate's complete resume.
+Analyze this resume.
 
 Resume:
 {resume}
@@ -29,35 +30,36 @@ Missing Skills:
 Job Description:
 {job_description}
 
-Analyze the resume and provide:
+Return ONLY valid JSON.
 
-# Overall Resume Review
+Do not write Markdown.
 
-# ATS Compatibility
+Do not use ```.
 
-# Strengths
+Return exactly this format:
 
-# Weaknesses
-
-# Missing Skills
-
-# Project Feedback
-
-# Experience Feedback
-
-# Resume Improvement Suggestions
-
-# Career Advice
-
-# Learning Roadmap
-
-Be professional.
-Be specific.
-Keep each section concise.
+{{
+    "overall_review": "",
+    "ats_compatibility": "",
+    "strengths": [],
+    "weaknesses": [],
+    "missing_skills_analysis": "",
+    "project_feedback": "",
+    "experience_feedback": "",
+    "resume_improvement": [],
+    "career_advice": "",
+    "learning_roadmap": []
+}}
 """)
 
 
-def get_ai_feedback(resume,score,matched,missing,job_description):
+def get_ai_feedback(
+    resume,
+    score,
+    matched,
+    missing,
+    job_description
+):
 
     chain = prompt | llm
 
@@ -69,4 +71,12 @@ def get_ai_feedback(resume,score,matched,missing,job_description):
         "job_description": job_description
     })
 
-    return response.content
+    try:
+        feedback = json.loads(response.content)
+    except json.JSONDecodeError:
+        feedback = {
+            "error": "AI returned invalid JSON.",
+            "raw_response": response.content
+        }
+
+    return feedback

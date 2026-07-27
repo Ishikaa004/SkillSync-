@@ -15,9 +15,7 @@ def read_job_description():
     return job_description
 
 
-def get_job_skills():
-
-    job_description = read_job_description()
+def get_job_skills(job_description):
 
     skills = extract_skills(job_description)
 
@@ -46,9 +44,10 @@ def calculate_ats_score(matched_skills, job_skills):
 
     return round(score, 2)
 
-def analyze_resume(resume_skills):
 
-    job_skills = get_job_skills()
+def analyze_resume(resume_skills,job_description):
+
+    job_skills = get_job_skills(job_description)
 
     matched_skills, missing_skills = compare_skills(
         resume_skills,
