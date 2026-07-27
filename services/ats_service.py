@@ -1,6 +1,6 @@
 from pathlib import Path
 from services.extractor_service import extract_skills
-
+from services.scoring_service import calculate_weighted_score
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -37,12 +37,10 @@ def compare_skills(resume_skills, job_skills):
 
 def calculate_ats_score(matched_skills, job_skills):
 
-    if len(job_skills) == 0:
-        return 0
-
-    score = (len(matched_skills) / len(job_skills)) * 100
-
-    return round(score, 2)
+    return calculate_weighted_score(
+        matched_skills,
+        job_skills
+    )
 
 
 def analyze_resume(resume_skills,job_description):
